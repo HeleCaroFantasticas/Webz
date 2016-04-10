@@ -1,0 +1,79 @@
+import java.net.*;
+import java.io.*;
+import java.util.*;
+
+public class Socket {
+
+	public static void main(String[] args) {
+		//System.out.println("Hello World");
+		
+		int port = Integer.parseInt(args[0]);
+	      try
+	      {
+	         Thread t = new GreetingServer(port);
+	         t.start();
+	      }catch(IOException e)
+	      {
+	         e.printStackTrace();
+	      }
+	}
+
+}
+
+
+
+class GreetingServer extends Thread
+{
+   private ServerSocket serverSocket;
+   
+   public GreetingServer(int port) throws IOException
+   {
+      serverSocket = new ServerSocket(port);
+      serverSocket.setSoTimeout(1000000);
+   }
+
+   public void run()
+   {
+      while(true)
+      {
+         try
+         {
+            System.out.println("Waiting for client on port " 
+            					+ serverSocket.getLocalPort() + "...");
+            java.net.Socket server = serverSocket.accept();
+            
+            System.out.println("Just connected to "
+            					+ server.getRemoteSocketAddress());
+            
+            
+            OutputStream os = server.getOutputStream();
+			PrintWriter pw = new PrintWriter(os, true);
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(server.getInputStream()));
+			String str = br.readLine();
+			
+			String respuesta = "";
+			if (str.contains("1.1")){
+				respuesta = "HTTP/1.1";
+			}
+			pw.println("Hello, " + str);
+			pw.close();
+			server.close();
+
+			System.out.println("Just said hello to:" + str);
+            
+            
+            
+           
+         }catch(SocketTimeoutException s)
+         {
+            System.out.println("Socket timed out!");
+            break;
+         }catch(IOException e)
+         {
+            e.printStackTrace();
+            break;
+         }
+      }
+   }
+}
